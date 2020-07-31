@@ -58,8 +58,8 @@ class QR:
     def draw(self, value: str, sheet: ezdxf.drawing.Drawing, layer: int, sign_origin_x: float, sign_origin_y: float, sign_width: float, sign_height: float) -> None:
         margin = float(self.margin.get())
         padding = float(self.padding.get())
-        assert margin >= 0, 'Margin must be positive'
-        assert padding >= 0, 'Padding must be positive'
+        assert margin >= 0, 'Margin must be positive.'
+        assert padding >= 0, 'Padding must be positive.'
         side = self.side.get()
         inverse = self.inverse.get()
         size = sign_height - 2 * margin - 2 * padding
@@ -135,7 +135,7 @@ class Text:
 
     def draw(self, value: str, sheet: ezdxf.drawing.Drawing, layer: int, sign_origin_x: float, sign_origin_y: float, sign_width: float, sign_height: float) -> None:
         size = float(self.size.get())
-        assert size >= 0, 'Font size must be positive'
+        assert size >= 0, 'Font size must be positive.'
         position = (
             sign_origin_x + float(self.position_x.get()),
             sign_origin_y - float(self.position_y.get())
@@ -176,7 +176,7 @@ class Hole:
         x = (sign_origin_x + float(self.position_x.get()))
         y = (sign_origin_y - float(self.position_y.get()))
         r = float(self.diameter.get()) / 2
-        assert r >= 0, 'Diameter must be positive'
+        assert r >= 0, 'Diameter must be positive.'
         sheet.modelspace().add_circle(
             (x, y), r, dxfattribs={'layer': str(layer)})
 
@@ -235,11 +235,11 @@ class Field:
             column = int(self.column.get())
             start_row = int(self.start_row.get())
             end_row = int(self.end_row.get())
-            assert start_row > 0, 'Start row must be greater than 0'
+            assert start_row > 0, 'Start row must be greater than 0.'
             if end_row == 0:  # End row 0 = no limit.
                 end_row = None
             else:
-                assert end_row >= start_row, 'End row must be greater than or equal to start row'
+                assert end_row >= start_row, 'End row must be greater than or equal to start row.'
             self.data = xlrd.open_workbook(self.path.get()).sheet_by_index(
                 0).col_slice(column - 1, start_rowx=start_row - 1, end_rowx=end_row)
             # Show to the user how many values were read.
@@ -405,7 +405,7 @@ class App(Tk):
             if self.selected_iid in self.fields:
                 field_iid = self.selected_iid
             else:
-                print('Select a field first')
+                print('Select a field first.')
                 return
         iid = self.tree.insert(field_iid, END, text=mark_type.__name__)
         self.fields[field_iid].marks[iid] = mark_type(self.properties)
@@ -417,7 +417,7 @@ class App(Tk):
             if self.selected_iid:
                 iid = self.selected_iid
             else:
-                print('Select something first')
+                print('Select something first.')
                 return
         # Check if the item to be removed is a field item, else check if it is a mark item.
         if iid in self.fields:
@@ -439,7 +439,7 @@ class App(Tk):
     # Create sheets according to entered settings.
     def create(self) -> None:
         if not self.fields:
-            print('No fields')
+            print('No fields.')
             return
 
         # Calculate the length of the longest field (some fields can have less values than others).
@@ -447,7 +447,7 @@ class App(Tk):
         for field_iid in self.fields:
             total_signs = max(total_signs, len(self.fields[field_iid].data))
         if total_signs == 0:
-            print('No fields with data')
+            print('No fields with data.')
             return
         try:
             sheet_width = float(self.sheet_width_var.get())
@@ -460,7 +460,7 @@ class App(Tk):
             assert sheet_width >= sign_width, 'Sheet width must be greater than sign width'
             assert sheet_height >= sign_height, 'Sheet height must be greater than sign height'
         except ValueError:
-            print('Invalid dimensions')
+            print('Invalid dimensions.')
             return
         except AssertionError as e:
             print(e)
@@ -481,12 +481,24 @@ class App(Tk):
         else:
             total_sheets = 1
 
+        print(f'Marking total of {total_signs} signs ({sign_width} x {sign_height}).')
+        print(f'Sheet size of {sheet_width} x {sheet_height} fits {signs_per_row} x {signs_per_column} signs,')
+        print(f'so the effective sheet size is {signs_per_row * sign_width} x {signs_per_column * sign_height}.')
+        print(f'Total of {total_layers} layer(s) are needed.')
+        if layers_per_sheet == 0:
+            print('There is no limit on the maximum amount of layers per sheet,')
+        else:
+            print(f'There are maximum of {layers_per_sheet} layer(s) per sheet,')
+        print(f'so total of {total_sheets} sheet(s) are needed.')
+
         # Create needed sheet objects.
+        print('Creating sheets.')
         sheets = []
         for _ in range(total_sheets):
             sheets.append(ezdxf.new(self.dxf_version.get()))
 
         # Iterate over all layers and draw their outline based on how many signs that layer will have.
+        print('Drawing layer outlines.')
         for layer in range(total_layers):
             max_x = sign_width * signs_per_row
             max_y = -sign_height * signs_per_column
@@ -504,6 +516,7 @@ class App(Tk):
                 [(0, max_y), (0, 0), (max_x, 0)], dxfattribs={'layer': str(layer)})
 
         # Iterate over each sign.
+        print('Drawing marks.')
         for sign_index in range(total_signs):
             # Update progress bar value.
             progress_bar['value'] = (sign_index + 1) / total_signs * 100
@@ -541,6 +554,7 @@ class App(Tk):
 
         # Save sheets.
         # Get a output directory if there are multiple sheets to be saved, otherwise get path for the single output (.dxf) file.
+        print('Saving.')
         if total_sheets > 1:
             if directory := tkinter.filedialog.askdirectory():
                 for index, sheet in enumerate(sheets):
@@ -551,6 +565,7 @@ class App(Tk):
         elif path := tkinter.filedialog.asksaveasfilename(defaultextension='.dxf', filetypes=(('DXF', '*.dxf'), ('All files', '*.*'))):
             sheets[0].saveas(path)
         progress_bar.grid_forget()
+        print('Success.')
 
 
 if __name__ == '__main__':
