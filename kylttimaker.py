@@ -267,7 +267,7 @@ class App(Tk):
     MAX_SHEETS_PER_FILE = 100
     SPINBOX_WIDTH = 8
     PADDING = 2
-    DXF_VERSION = 'R2000'
+    DXF_VERSIONS = ('R12', 'R2000', 'R2004', 'R2007', 'R2010', 'R2013', 'R2018')
 
     # Initialize GUI layout.
     def __init__(self) -> None:
@@ -326,8 +326,12 @@ class App(Tk):
                 width=App.SPINBOX_WIDTH).grid(column=1, row=2, sticky='WE')
         Label(self.frame, text='(0 = No limit)').grid(
             column=2, row=2, columnspan=2, sticky='W')
+        Label(self.frame, text='DXF version').grid(column=0, row=4, sticky='E', pady=App.PADDING)
+        self.dxf_version = StringVar(self.frame)
+        OptionMenu(self.frame, self.dxf_version,
+                   App.DXF_VERSIONS[1], *App.DXF_VERSIONS).grid(column=1, row=4, sticky='W')
         Button(self.frame, text='Create',
-               command=self.create).grid(column=1, row=4)
+               command=self.create).grid(column=2, row=4, columnspan=2)
         self.frame.pack()
 
     # Display a popup menu with relevant options when right clicking on the tree widget item.
@@ -464,7 +468,7 @@ class App(Tk):
 
         # Show progress bar.
         progress_bar = Progressbar(self.frame)
-        progress_bar.grid(column=0, row=3, columnspan=4, sticky='WE')
+        progress_bar.grid(column=0, row=5, columnspan=4, sticky='WE')
 
         # Calculate the needed values to define sheet layout.
         signs_per_row = int(sheet_width // sign_width)
@@ -480,7 +484,7 @@ class App(Tk):
         # Create needed sheet objects.
         sheets = []
         for _ in range(total_sheets):
-            sheets.append(ezdxf.new(App.DXF_VERSION))
+            sheets.append(ezdxf.new(self.dxf_version.get()))
 
         # Iterate over all layers and draw their outline based on how many signs that layer will have.
         for layer in range(total_layers):
