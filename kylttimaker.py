@@ -23,28 +23,36 @@ import pyqrcode
 
 # QR code with relevant alignment options that can be drawn on a sheet.
 class QR:
-    SIDE_OPTIONS = ['LEFT', 'RIGHT']
-    DEFAULT_MARGIN = 2
-    DEFAULT_PADDING = 0
+    DEFAULT_X = 1.0
+    DEFAULT_Y = 1.0
+    DEFAULT_SIZE = 20.0
+    DEFAULT_INVERSE = False
+    DEFAULT_PADDING = 0.0
 
     # Initialize a GUI frame where user can enter the relevant options.
     def __init__(self, properties: LabelFrame) -> None:
         self.frame = Frame(properties)
-        Label(self.frame, text='Side').grid(
+        Label(self.frame, text='Position').grid(
             column=0, row=0, sticky='E', pady=App.PADDING)
-        self.side = StringVar(self.frame)
-        OptionMenu(self.frame, self.side,
-                   QR.SIDE_OPTIONS[0], *QR.SIDE_OPTIONS).grid(column=1, row=0, sticky='W')
-        Label(self.frame, text='Margin').grid(
+        self.position_x = StringVar(self.frame)
+        self.position_x.set(QR.DEFAULT_X)
+        Spinbox(self.frame, to=App.MAX_SHEET_WIDTH, textvariable=self.position_x,
+                width=App.SPINBOX_WIDTH).grid(column=1, row=0, sticky='WE')
+        Label(self.frame, text='x').grid(column=2, row=0)
+        self.position_y = StringVar(self.frame)
+        self.position_y.set(QR.DEFAULT_Y)
+        Spinbox(self.frame, to=App.MAX_SHEET_HEIGHT, textvariable=self.position_y,
+                width=App.SPINBOX_WIDTH).grid(column=3, row=0, sticky='WE')
+        Label(self.frame, text='Size').grid(
             column=0, row=1, sticky='E', pady=App.PADDING)
-        self.margin = StringVar(self.frame)
-        self.margin.set(QR.DEFAULT_MARGIN)
-        Spinbox(self.frame, to=App.MAX_SHEET_HEIGHT, textvariable=self.margin,
+        self.size = StringVar(self.frame)
+        self.size.set(QR.DEFAULT_SIZE)
+        Spinbox(self.frame, to=App.MAX_SHEET_HEIGHT, textvariable=self.size,
                 width=App.SPINBOX_WIDTH).grid(column=1, row=1, sticky='W')
         Label(self.frame, text='Inverse').grid(
             column=0, row=2, sticky='E', pady=App.PADDING)
         self.inverse = BooleanVar(self.frame)
-        self.inverse.set(False)
+        self.inverse.set(QR.DEFAULT_INVERSE)
         Checkbutton(self.frame, variable=self.inverse).grid(
             column=1, row=2, sticky='W')
         Label(self.frame, text='Padding').grid(
@@ -56,45 +64,36 @@ class QR:
 
     # Draws the QR code on the sheet
     def draw(self, value: str, sheet: ezdxf.drawing.Drawing, layer: int, sign_origin_x: float, sign_origin_y: float, sign_width: float, sign_height: float) -> None:
-        margin = float(self.margin.get())
-        padding = float(self.padding.get())
-        assert margin >= 0, 'Margin must be positive.'
-        assert padding >= 0, 'Padding must be positive.'
-        side = self.side.get()
+        position_x = float(self.position_x.get())
+        position_y = float(self.position_y.get())
+        size = float(self.size.get())
         inverse = self.inverse.get()
-        size = sign_height - 2 * margin - 2 * padding
+        padding = float(self.padding.get())
+
         hatch = sheet.modelspace().add_hatch(
             dxfattribs={'layer': str(layer), 'hatch_style': 1})
 
-        if side == QR.SIDE_OPTIONS[1]:
-            sign_origin_x += sign_width - sign_height
-
         if inverse:
             hatch.paths.add_polyline_path([
-                (sign_origin_x + margin, sign_origin_y - margin),
-                (sign_origin_x + sign_height - margin, sign_origin_y - margin),
-                (sign_origin_x + sign_height - margin,
-                 sign_origin_y + margin - sign_height),
-                (sign_origin_x + margin, sign_origin_y + margin - sign_height)
+                (sign_origin_x + position_x, sign_origin_y - position_y),
+                (sign_origin_x + position_x + size, sign_origin_y - position_y),
+                (sign_origin_x + position_x + size, sign_origin_y - position_y - size),
+                (sign_origin_x + position_x, sign_origin_y - position_y - size)
             ])
 
         # Gets the QR code as multi line string of ones and zeros
         code = pyqrcode.create(value).text(quiet_zone=0)
         lines = code.splitlines()
-        cell_size = size / len(lines)
+        cell_size = (size - 2 * padding) / len(lines)
 
         for y, line in enumerate(lines):
             for x, char in enumerate(line):
                 if char == '1':
                     hatch.paths.add_polyline_path([
-                        (sign_origin_x + margin + padding + x * cell_size,
-                         sign_origin_y - margin - padding - y * cell_size),
-                        (sign_origin_x + margin + padding + (x + 1) * cell_size,
-                         sign_origin_y - margin - padding - y * cell_size),
-                        (sign_origin_x + margin + padding + (x + 1) * cell_size,
-                         sign_origin_y - margin - padding - (y + 1) * cell_size),
-                        (sign_origin_x + margin + padding + x * cell_size,
-                         sign_origin_y - margin - padding - (y + 1) * cell_size)
+                        (sign_origin_x + position_x + padding + x * cell_size, sign_origin_y - position_y - padding - y * cell_size),
+                        (sign_origin_x + position_x + padding + (x + 1) * cell_size, sign_origin_y - position_y - padding - y * cell_size),
+                        (sign_origin_x + position_x + padding + (x + 1) * cell_size, sign_origin_y - position_y - padding - (y + 1) * cell_size),
+                        (sign_origin_x + position_x + padding + x * cell_size, sign_origin_y - position_y - padding - (y + 1) * cell_size)
                     ])
 
 
