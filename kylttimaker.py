@@ -226,8 +226,8 @@ class Field:
 
     # Get the field input path (excel file) from the user and displays it in the relevant entry box.
     def select(self) -> None:
-        self.path.set(tkinter.filedialog.askopenfilename(
-            filetypes=(('Excel', '*.xlsx'), ('Excel', '*.xls'))))
+        if dialog_path := tkinter.filedialog.askopenfilename(filetypes=(('Excel', '*.xlsx'), ('Excel', '*.xls'))):
+            self.path.set(dialog_path)
 
     # Populate field's data variable by reading the file specified by path variable.
     def read(self) -> None:
