@@ -455,10 +455,10 @@ class App(Tk):
             sign_width = float(self.sign_width_var.get())
             sign_height = float(self.sign_height_var.get())
             layers_per_sheet = int(self.layers_per_sheet_var.get())
-            assert sign_width > 0, 'Sign width must be greater than 0'
-            assert sign_height > 0, 'Sign height must be greater than 0'
-            assert sheet_width >= sign_width, 'Sheet width must be greater than sign width'
-            assert sheet_height >= sign_height, 'Sheet height must be greater than sign height'
+            assert sign_width > 0, 'Sign width must be greater than 0.'
+            assert sign_height > 0, 'Sign height must be greater than 0.'
+            assert sheet_width >= sign_width, 'Sheet width must be greater than sign width.'
+            assert sheet_height >= sign_height, 'Sheet height must be greater than sign height.'
         except ValueError:
             print('Invalid dimensions.')
             return
@@ -558,7 +558,7 @@ class App(Tk):
         if total_sheets > 1:
             if directory := tkinter.filedialog.askdirectory():
                 for index, sheet in enumerate(sheets):
-                    # Indicate save progress
+                    # Indicate save progress.
                     progress_bar['value'] = (index + 1) / len(sheets) * 100
                     progress_bar.update()
                     sheet.saveas(Path(directory) / f'sheet{index}.dxf')
