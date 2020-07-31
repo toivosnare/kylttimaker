@@ -436,11 +436,11 @@ class App(Tk):
         for item in self.tree.selection():
             self.tree.selection_remove(item)
 
-    # Create sheets according to entered settings. Return true if all signs where created succesfully.
-    def create(self) -> bool:
+    # Create sheets according to entered settings.
+    def create(self) -> None:
         if not self.fields:
             print('No fields')
-            return False
+            return
 
         # Calculate the length of the longest field (some fields can have less values than others).
         total_signs = 0
@@ -448,7 +448,7 @@ class App(Tk):
             total_signs = max(total_signs, len(self.fields[field_iid].data))
         if total_signs == 0:
             print('No fields with data')
-            return False
+            return
         try:
             sheet_width = float(self.sheet_width_var.get())
             sheet_height = float(self.sheet_height_var.get())
@@ -461,10 +461,10 @@ class App(Tk):
             assert sheet_height >= sign_height, 'Sheet height must be greater than sign height'
         except ValueError:
             print('Invalid dimensions')
-            return False
+            return
         except AssertionError as e:
             print(e)
-            return False
+            return
 
         # Show progress bar.
         progress_bar = Progressbar(self.frame)
@@ -528,7 +528,7 @@ class App(Tk):
                 except Exception as e:
                     print(e)
                     progress_bar.grid_forget()
-                    return False
+                    return
 
             # Draw sign outline (right and bottom side bounds).
             sign_outline = [
@@ -542,15 +542,15 @@ class App(Tk):
         # Save sheets.
         # Get a output directory if there are multiple sheets to be saved, otherwise get path for the single output (.dxf) file.
         if total_sheets > 1:
-            directory = tkinter.filedialog.askdirectory()
-            for index, sheet in enumerate(sheets):
-                sheet.saveas(Path(directory) / f'sheet{index}.dxf')
-        else:
-            path = tkinter.filedialog.asksaveasfilename(
-                defaultextension='.dxf', filetypes=(('DXF', '*.dxf'), ('All files', '*.*')))
+            if directory := tkinter.filedialog.askdirectory():
+                for index, sheet in enumerate(sheets):
+                    # Indicate save progress
+                    progress_bar['value'] = (index + 1) / len(sheets) * 100
+                    progress_bar.update()
+                    sheet.saveas(Path(directory) / f'sheet{index}.dxf')
+        elif path := tkinter.filedialog.asksaveasfilename(defaultextension='.dxf', filetypes=(('DXF', '*.dxf'), ('All files', '*.*'))):
             sheets[0].saveas(path)
         progress_bar.grid_forget()
-        return True
 
 
 if __name__ == '__main__':
