@@ -266,7 +266,7 @@ class App(Tk):
     MAX_SHEETS_PER_FILE = 100
     SPINBOX_WIDTH = 8
     PADDING = 2
-    DXF_VERSIONS = ('R12', 'R2000', 'R2004', 'R2007', 'R2010', 'R2013', 'R2018')
+    DXF_VERSIONS = ('R2000', 'R2004', 'R2007', 'R2010', 'R2013', 'R2018')
 
     # Initialize GUI layout.
     def __init__(self) -> None:
@@ -328,7 +328,7 @@ class App(Tk):
         Label(self.frame, text='DXF version').grid(column=0, row=4, sticky='E', pady=App.PADDING)
         self.dxf_version = StringVar(self.frame)
         OptionMenu(self.frame, self.dxf_version,
-                   App.DXF_VERSIONS[1], *App.DXF_VERSIONS).grid(column=1, row=4, sticky='W')
+                   App.DXF_VERSIONS[0], *App.DXF_VERSIONS).grid(column=1, row=4, sticky='W')
         Button(self.frame, text='Create',
                command=self.create).grid(column=2, row=4, columnspan=2)
         self.frame.pack()
