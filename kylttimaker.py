@@ -32,35 +32,37 @@ class QR:
     # Initialize a GUI frame where user can enter the relevant options.
     def __init__(self, properties: LabelFrame) -> None:
         self.frame = Frame(properties)
-        Label(self.frame, text='Position').grid(
+
+        Label(self.frame, text='X').grid(
             column=0, row=0, sticky='E', pady=App.PADDING)
         self.position_x = StringVar(self.frame)
         self.position_x.set(QR.DEFAULT_X)
         Spinbox(self.frame, to=App.MAX_SHEET_WIDTH, textvariable=self.position_x,
-                width=App.SPINBOX_WIDTH).grid(column=1, row=0, sticky='WE')
-        Label(self.frame, text='x').grid(column=2, row=0)
+                width=App.SPINBOX_WIDTH).grid(column=1, row=0, sticky='W')
+        Label(self.frame, text='Y').grid(
+            column=0, row=1, sticky='E', pady=App.PADDING)
         self.position_y = StringVar(self.frame)
         self.position_y.set(QR.DEFAULT_Y)
         Spinbox(self.frame, to=App.MAX_SHEET_HEIGHT, textvariable=self.position_y,
-                width=App.SPINBOX_WIDTH).grid(column=3, row=0, sticky='WE')
+                width=App.SPINBOX_WIDTH).grid(column=1, row=1, sticky='W')
         Label(self.frame, text='Size').grid(
-            column=0, row=1, sticky='E', pady=App.PADDING)
+            column=0, row=2, sticky='E', pady=App.PADDING)
         self.size = StringVar(self.frame)
         self.size.set(QR.DEFAULT_SIZE)
         Spinbox(self.frame, to=App.MAX_SHEET_HEIGHT, textvariable=self.size,
-                width=App.SPINBOX_WIDTH).grid(column=1, row=1, sticky='W')
+                width=App.SPINBOX_WIDTH).grid(column=1, row=2, sticky='W')
         Label(self.frame, text='Inverse').grid(
-            column=0, row=2, sticky='E', pady=App.PADDING)
+            column=0, row=3, sticky='E', pady=App.PADDING)
         self.inverse = BooleanVar(self.frame)
         self.inverse.set(QR.DEFAULT_INVERSE)
         Checkbutton(self.frame, variable=self.inverse).grid(
-            column=1, row=2, sticky='W')
+            column=1, row=3, sticky='W')
         Label(self.frame, text='Padding').grid(
-            column=0, row=3, sticky='E', pady=App.PADDING)
+            column=0, row=4, sticky='E', pady=App.PADDING)
         self.padding = StringVar(self.frame)
         self.padding.set(QR.DEFAULT_PADDING)
         Spinbox(self.frame, to=App.MAX_SHEET_HEIGHT, textvariable=self.padding,
-                width=App.SPINBOX_WIDTH).grid(column=1, row=3, sticky='W')
+                width=App.SPINBOX_WIDTH).grid(column=1, row=4, sticky='W')
 
     # Draws the QR code on the sheet
     def draw(self, value: str, sheet: ezdxf.drawing.Drawing, layer: int, sign_origin_x: float, sign_origin_y: float, sign_width: float, sign_height: float) -> None:
