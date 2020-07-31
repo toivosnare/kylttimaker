@@ -1,6 +1,6 @@
 # kylttimaker
 
-This program is used automate product label/sign marking by creating 2D drawing
+This program is used to automate product label/sign marking by creating 2D drawing
 files in the .dxf format. The input data is read from a excel input file. The
 data can be displayed as a text, a QR code or a combination of the options.
 
